@@ -153,6 +153,7 @@ Ext.define('MyWorkFlowApp.model.MyModel', {
 
             }(),
 //                            url: 'http://localhost/MyWorkFlowWebApp/web/app/data/mytreedata4.json',
+//                            url: 'http://localhost/MyWorkFlowWebApp/web/app/data/mytreedata4.json',
             reader:{
                 type:'json'
             },
