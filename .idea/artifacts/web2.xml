@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-war" name="web2">
+    <output-path>$PROJECT_DIR$/out/artifacts/web2</output-path>
+    <root id="root">
+      <element id="dir-copy" path="$PROJECT_DIR$/web2" />
+    </root>
+  </artifact>
+</component>
