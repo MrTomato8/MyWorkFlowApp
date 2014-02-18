@@ -82,7 +82,12 @@ function getAttributeString(attr)
 Ext.define('MyWorkFlowApp.model.MyModel', {
     extend:'Ext.data.Model',
 
-    requires:['Ext.data.identifier.Uuid'],
+    requires:[
+        'Ext.data.identifier.Uuid'
+            ,'Ext.data.Store'
+            ,'MyWorkFlowApp.model.MyLocalStorageModel'
+            ,'MyWorkFlowApp.model.MyLocalStorageModel'
+    ],
 
     config:{
         fields:[
@@ -142,17 +147,31 @@ Ext.define('MyWorkFlowApp.model.MyModel', {
         proxy:{
             type:'ajax',
             batchActions:false,
+
             url:function(){
 
+//                return "dfsfds";
+
+            var username = 'public';
+
+            if (urlParams && Ext.isString(urlParams.username) && urlParams.username.length > 0)
+                {
+                    username = urlParams.username;
+                }
+
                 if (window.location.hostname === "localhost")
-                    { return 'http://localhost/MyWorkFlowWebApp/data/sunaxe/MyPetProjects.json';}
+                    {
+                        return 'http://localhost/data/sunaxe/' + username + '.json';
+//                                return 'http://localhost/MyWorkFlowWebApp/data/sunaxe/' + username + '.json';
+                    }
                 else if (window.location.hostname === "sunnyjacob.co.uk")
-                    { return 'http://sunnyjacob.co.uk/PetProjects/data/sunaxe/MyPetProjects.json';}
+                            { return 'http://sunnyjacob.co.uk/PetProjects/data/sunaxe/' + username + '.json';}
                 else
                     {return "change host name settings";}
 
             }(),
-//                            url: 'http://localhost/MyWorkFlowWebApp/web/app/data/mytreedata4.json',
+
+//                            url: 'http://localhost/nonexistentdata.json',
 //                            url: 'http://localhost/MyWorkFlowWebApp/web/app/data/mytreedata4.json',
             reader:{
                 type:'json'
@@ -164,6 +183,18 @@ Ext.define('MyWorkFlowApp.model.MyModel', {
             //                ,create:Ext.emptyFn
             //                ,read:Ext.emptyFn
             //                ,update:Ext.emptyFn, destroy:function () {}
+
+            ,listeners:{
+                            'exception':function()
+                                {
+//                                    debugger;
+                                    var mycontroller = MyWorkFlowApp.app.getController('MyWorkFlowApp.controller.MyController');
+
+                                    mycontroller.loadException();
+
+
+                                }
+                        }
         }
 
     },

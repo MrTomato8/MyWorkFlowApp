@@ -8,6 +8,7 @@ Ext.define('MyWorkFlowApp.controller.MyController', {
             'Ext.field.Text',
 //            'Ext.Date',
             'Ext.field.Spinner'
+            ,'MyWorkFlowApp.model.MyLocalStorageModel'
         ],
 
     config:{
@@ -50,17 +51,68 @@ Ext.define('MyWorkFlowApp.controller.MyController', {
                 activeitemchange:'activate'
             },
             nestedList:{
-                itemtap:'itemtap'
+                itemtap:'itemtap',
+                itemtaphold:'itemtaphold'
                 ,back:'back'
-            }
+            },
+            mynestedlist:{
+                itemtap:'itemtap',
+                itemtaphold:'itemtaphold'
+                ,initialize:'listInit'
+                ,back:'back'
+            },
+            'viewport': {
+                            //capture the orientation change event
+                            orientationchange: 'onOrientationchange'
+                        }
         },
 
         refs:{
             mytabpanel:'tabpanel[id=mytabpanel]',
             list:'list[id=MyJsonList]',
             list2:'list[id=MyJsonList2]',
-            nestedList:'nestedlist'
+            nestedList:'nestedlist',
+            myContainer:'#mycontainer',
+            itemEditPanel:'itemeditpanel[id=itemeditpanel]'
         }
+    },
+
+    loadException:function(){
+//        debugger;
+
+
+        var store = Ext.create('Ext.data.Store', {
+                        model: "MyWorkFlowApp.model.MyLocalStorageModel"
+                    });
+
+                    store.load();
+
+//                                    debugger;
+
+        var rec = store.getAt(0);
+//        var rec = store.data.items[0];
+        var myjsondata = '';
+
+        if (rec && rec.data && rec.data.jsondata) myjsondata = rec.data.jsondata;
+
+//        myjsondata = rec.get('jsondata');
+        myjsondata = eval(myjsondata);
+
+//                                    debugger;
+
+        var treestore = Ext.getStore('MyJsonTreeStore');
+
+        treestore.setProxy({
+            type:'memory',
+            data:myjsondata
+        });
+
+        treestore.load();
+
+//                                    treestore.setData(jsondata);
+
+//                                    var MyJsonTree = Ext.getCmp('MyJsonTree');
+//                                    MyJsonTree.refresh();
     },
 
     activate:function( tabpanel, tab, oldtab, eOpts )
@@ -74,9 +126,33 @@ Ext.define('MyWorkFlowApp.controller.MyController', {
 
     itemtap:function (nestedList, list, index, target, record, e, eOpts)
         {
+//            debugger;
             this.currentList = list;
             this.currentRecord = record;
 
+            this.getItemEditPanel().setRecord(this.currentRecord);
+        },
+
+    itemtaphold:function (nestedList, list, index, target, record, e, eOpts)
+        {
+//            debugger;
+            this.currentList = list;
+            this.currentRecord = record;
+
+            //Ext.Msg.alert('itemtap HOLD', 'itemtap HOLD');
+
+            var actionSheet = nestedList.up('maintabpanel').query('actionsheet')[0];
+
+            actionSheet.show();
+
+        },
+
+    listInit:function()
+        {
+            var list = this.getNestedList();
+            var items = list.getDockedItems();
+            items[0].insert(items.length - 1, {text:'+', id:'add'});
+//            debugger;
         },
 
     back:function ( nestedList, node, lastActiveList, detailCardActive, eOpts )
@@ -306,12 +382,32 @@ Ext.define('MyWorkFlowApp.controller.MyController', {
                     { return "http://sunnyjacob.co.uk/PetProjects/php/PetProjects.php";}
             }();
 
+            var params = {jsondata:toJSON};
+
+            if (urlParams && Ext.isString(urlParams.username) && urlParams.username.length > 0)
+                            {
+                                params.username = urlParams.username;
+                            }
+
             Ext.Ajax.request({
                 url:url,
 //                url:"http://sunnyjacob.co.uk/app/saveTreeData3.php",
 //                url:"http://localhost/MyWorkFlowWebApp/web/php/saveTreeData2.php",
-                params:{jsondata:toJSON}
+                params:params
             });
+
+            var store = Ext.create('Ext.data.Store', {
+                model: "MyWorkFlowApp.model.MyLocalStorageModel"
+            });
+
+            store.load();
+            //debugger;
+
+            var localdata = Ext.create('MyWorkFlowApp.model.MyLocalStorageModel', {jsondata:toJSON});
+
+//            localdata.save();
+            store.add(localdata);
+            store.sync();
 
 //            this.refreshList();
 
@@ -548,5 +644,44 @@ Ext.define('MyWorkFlowApp.controller.MyController', {
             gridstore.removeAll();
             gridstore.add(all);
             gridstore.sort();
+        },
+
+    onOrientationchange: function(viewport, orientation, width, height) {
+            console.log('Viewport orientation just changed');
+
+
+            //another way to check the orientation is by checking the
+            //height and width of the screen window
+            //There are some issues with the orientation when the code
+            //was run on an Android Tablet so you check the height and
+            //width for a temporary fix until sencha provides one.
+            console.log(height);
+            console.log(width);
+            if(width > height){
+                orientation = 'landscape';
+            }
+            else {
+                orientation = 'portrait';
+            }
+            console.log('Orientation is ' + orientation);
+
+            //remove all the items from the main panel
+//            this.getMyContainer().removeAll(false,false);
+
+            //add the landscape panel based on orientation
+            if(orientation == 'landscape'){
+                this.getMyContainer().add(this.getItemEditPanel());
+//                console.log(landscapePanel.getItems());
+//                landscapePanel.add([screenLayout1,screenLayout2]);
+//                this.getMyContainer().add([landscapePanel]);
+            }
+
+            //add the portrait panel based on orientation
+            if(orientation == 'portrait'){
+                this.getMyContainer().remove(this.getItemEditPanel(), false,false);
+//                console.log(portraitPanel.getItems());
+//                portraitPanel.add([screenLayout1,screenLayout2]);
+//                this.getMyContainer().add([portraitPanel]);
+            }
         }
 });

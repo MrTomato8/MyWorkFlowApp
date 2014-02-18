@@ -27,11 +27,14 @@ Ext.define('MyWorkFlowApp.store.MyJsonTreeStore', {
 
 
         me.callParent([Ext.apply({
-            autoLoad: true,
+            autoLoad: false,
 //            autoSync: true,
             storeId: 'MyJsonTreeStore',
             model: 'MyWorkFlowApp.model.MyModel',
             sorters:[{property:'priority', direction: 'DESC'}],
+
+
+
 //            defaultRootProperty: 'children',
 /*
             root: {

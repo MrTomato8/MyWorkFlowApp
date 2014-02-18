@@ -6,7 +6,9 @@ Ext.application({
         ,'MyWorkFlowApp.controller.MyController'
         ,'MyWorkFlowApp.store.MyJsonTreeStore'
                     ,'MyWorkFlowApp.store.MyJsonStore'
+
             ,'Ext.form.Panel'
+            ,'Ext.data.proxy.Memory'
     ],
 
     controllers:[
@@ -15,6 +17,7 @@ Ext.application({
 
     models: [
             'MyWorkFlowApp.model.MyModel'
+            ,'MyWorkFlowApp.model.MyLocalStorageModel'
         ],
         stores: [
 //            'MyWorkFlowApp.store.MyJsonTreeStore',
@@ -43,6 +46,10 @@ Ext.application({
     launch: function() {
         // Destroy the #appLoadingIndicator element
         Ext.fly('appLoadingIndicator').destroy();
+
+//        this.myCtrl = this.getController('MyController');
+        var treestore = Ext.getStore('MyJsonTreeStore');
+        treestore.load();
 
         // Initialize the main view
         Ext.Viewport.add(Ext.create('MyWorkFlowApp.view.Main'));
